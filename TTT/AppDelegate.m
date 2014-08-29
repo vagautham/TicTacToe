@@ -7,12 +7,22 @@
 //
 
 #import "AppDelegate.h"
+#import "SplashViewController.h"
 
 @implementation AppDelegate
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
     // Override point for customization after application launch.
+    SplashViewController* mSplashViewController = [[SplashViewController alloc] init];
+   
+    UINavigationController* navigationController = [[UINavigationController alloc] initWithRootViewController:mSplashViewController];
+    [navigationController setNavigationBarHidden:TRUE];
+   
+    self.window.backgroundColor = [UIColor whiteColor];
+    self.window.rootViewController = navigationController;
+    [self.window makeKeyAndVisible];
+
     return YES;
 }
 							

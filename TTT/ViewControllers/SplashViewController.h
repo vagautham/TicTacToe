@@ -1,5 +1,5 @@
 //
-//  ViewController.h
+//  SplashViewController.h
 //  TTT
 //
 //  Created by VA Gautham  on 8/27/14.
@@ -8,6 +8,6 @@
 
 #import <UIKit/UIKit.h>
 
-@interface ViewController : UIViewController
+@interface SplashViewController : UIViewController
 
 @end
