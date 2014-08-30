@@ -76,13 +76,13 @@
     [self.view setBackgroundColor:[UIColor colorWithPatternImage:[UIImage imageNamed:@"BG_Plain-568h.png"]]];
     Player1Wins = 0;
     Player2Wins = 0;
-    totalMatches = -1;
+    totalMatches = 0;
     
     [lbl_Player1 setText:_Player1Name];
     [lbl_Player2 setText:_Player2Name];
     
-    [lbl_score setText:[NSString stringWithFormat:@"%d - %d", Player1Wins, Player2Wins]];
-    [lbl_Totalmatches setText:[NSString stringWithFormat:@"(%d)", totalMatches+1]];
+    [lbl_score setText:[NSString stringWithFormat:@"%d (%d tie(s)) %d", Player1Wins,(totalMatches - (Player2Wins + Player1Wins)), Player2Wins]];
+    [lbl_Totalmatches setText:[NSString stringWithFormat:@"(%d game(s))", totalMatches]];
 }
 
 -(void)resetGameBoard
@@ -299,8 +299,8 @@
             gameResultAlert = [[UIAlertView alloc] initWithTitle:@"Its a Tie" message:@"Try again?" delegate:self cancelButtonTitle:@"Cancel" otherButtonTitles:@"Retry", nil];
             [gameResultAlert show];
             ++totalMatches;
-            [lbl_score setText:[NSString stringWithFormat:@"%d - %d", Player1Wins, Player2Wins]];
-            [lbl_Totalmatches setText:[NSString stringWithFormat:@"(%d)", totalMatches]];
+            [lbl_score setText:[NSString stringWithFormat:@"%d (%d tie(s)) %d", Player1Wins,(totalMatches - (Player2Wins + Player1Wins)), Player2Wins]];
+            [lbl_Totalmatches setText:[NSString stringWithFormat:@"(%d game(s))", totalMatches]];
             _gameOver = TRUE;
             return;
         }
@@ -314,8 +314,8 @@
                 //[gameResultAlert show];
                 ++totalMatches;
                 ++Player1Wins;
-                [lbl_score setText:[NSString stringWithFormat:@"%d - %d", Player1Wins, Player2Wins]];
-                [lbl_Totalmatches setText:[NSString stringWithFormat:@"(%d)", totalMatches]];
+                [lbl_score setText:[NSString stringWithFormat:@"%d (%d tie(s)) %d", Player1Wins,(totalMatches - (Player2Wins + Player1Wins)), Player2Wins]];
+                [lbl_Totalmatches setText:[NSString stringWithFormat:@"(%d game(s))", totalMatches]];
                 [self animateWinner:Player_1_Turn];
                 _gameOver = TRUE;
                 return;
@@ -340,8 +340,8 @@
                 //[gameResultAlert show];
                 ++totalMatches;
                 ++Player2Wins;
-                [lbl_score setText:[NSString stringWithFormat:@"%d - %d", Player1Wins, Player2Wins]];
-                [lbl_Totalmatches setText:[NSString stringWithFormat:@"(%d)", totalMatches]];
+                [lbl_score setText:[NSString stringWithFormat:@"%d (%d tie(s)) %d", Player1Wins,(totalMatches - (Player2Wins + Player1Wins)), Player2Wins]];
+                [lbl_Totalmatches setText:[NSString stringWithFormat:@"(%d game(s))", totalMatches]];
                 [self animateWinner:Player_2_Turn];
                 _gameOver = TRUE;
                 return;
@@ -510,11 +510,8 @@
         {
             //Take any corner
             NSString *corner = [self getCorner];
-            if (corner)
-                return corner;
-            NSString *unblockPosition = [self getUnblockingPosition];
-            if (unblockPosition)
-                return unblockPosition;
+            return corner;
+            
         }
         else
         {
@@ -529,9 +526,15 @@
                     return unblockPosition;
                 else
                 {
-                    NSString *emptyPostion = [self getEmptyPostion];
-                    if (emptyPostion)
-                        return emptyPostion;
+                    NSString *corner = [self getCorner];
+                    if (corner)
+                        return corner;
+                    else
+                    {
+                        NSString *emptyPostion = [self getEmptyPostion];
+                        if (emptyPostion)
+                            return emptyPostion;
+                    }
                 }
             }
         }
@@ -552,6 +555,10 @@
 
 -(NSString *)getCorner
 {
+    NSString *blockingCorener = [self getBlockingCorners];
+    if (blockingCorener)
+        return blockingCorener;
+    
     if ([[gameBoardStatus valueForKey:BOARD_0x0] intValue] == Slot_Empty)
         return BOARD_0x0;
     else if ([[gameBoardStatus valueForKey:BOARD_0x2] intValue] == Slot_Empty)
@@ -560,6 +567,28 @@
         return BOARD_2x0;
     else if ([[gameBoardStatus valueForKey:BOARD_2x2] intValue] == Slot_Empty)
         return BOARD_2x2;
+    return nil;
+}
+
+-(NSString *)getBlockingCorners
+{
+    NSArray *xPostions = [gameBoardStatus allKeysForObject:[NSNumber numberWithInt:Slot_X]];
+    if ([xPostions containsObject:BOARD_0x1] || [xPostions containsObject:BOARD_1x0])
+        if ([[gameBoardStatus valueForKey:BOARD_0x0] intValue] == Slot_Empty)
+            return BOARD_0x0;
+    
+    if ([xPostions containsObject:BOARD_0x1] || [xPostions containsObject:BOARD_1x2])
+        if ([[gameBoardStatus valueForKey:BOARD_0x2] intValue] == Slot_Empty)
+            return BOARD_0x2;
+
+    if ([xPostions containsObject:BOARD_1x0] || [xPostions containsObject:BOARD_2x1])
+        if ([[gameBoardStatus valueForKey:BOARD_2x0] intValue] == Slot_Empty)
+            return BOARD_2x0;
+    
+    if ([xPostions containsObject:BOARD_1x2] || [xPostions containsObject:BOARD_2x1])
+        if ([[gameBoardStatus valueForKey:BOARD_2x2] intValue] == Slot_Empty)
+            return BOARD_2x2;
+    
     return nil;
 }
 
@@ -760,8 +789,8 @@
         gameResultAlert = [[UIAlertView alloc] initWithTitle:@"Its a Tie" message:@"Try again?" delegate:self cancelButtonTitle:@"Cancel" otherButtonTitles:@"Retry", nil];
         [gameResultAlert show];
         ++totalMatches;
-        [lbl_score setText:[NSString stringWithFormat:@"%d - %d", Player1Wins, Player2Wins]];
-        [lbl_Totalmatches setText:[NSString stringWithFormat:@"(%d)", totalMatches]];
+        [lbl_score setText:[NSString stringWithFormat:@"%d (%d tie(s)) %d", Player1Wins,(totalMatches - (Player2Wins + Player1Wins)), Player2Wins]];
+        [lbl_Totalmatches setText:[NSString stringWithFormat:@"(%d game(s))", totalMatches]];
         _gameOver = TRUE;
         return;
     }
@@ -775,8 +804,8 @@
         
         ++Player2Wins;
         ++totalMatches;
-        [lbl_score setText:[NSString stringWithFormat:@"%d - %d", Player1Wins, Player2Wins]];
-        [lbl_Totalmatches setText:[NSString stringWithFormat:@"(%d)", totalMatches]];
+        [lbl_score setText:[NSString stringWithFormat:@"%d (%d tie(s)) %d", Player1Wins,(totalMatches - (Player2Wins + Player1Wins)), Player2Wins]];
+        [lbl_Totalmatches setText:[NSString stringWithFormat:@"(%d game(s))", totalMatches]];
         [self animateWinner:Player_2_Turn];
         _gameOver = TRUE;
         return;
